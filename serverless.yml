@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: aws-nodejs # NOTE: update this with your service name
+service: handler # NOTE: update this with your service name
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -23,14 +23,27 @@ provider:
 
 # you can overwrite defaults here
 #  stage: dev
-#  region: us-east-1
+  region: us-west-1
 
 # you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
    - Effect: "Allow"
      Action:
+       - "s3:ListBucket"
+     Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+   - Effect: "Allow"
+     Action:
        - "dynamodb:*"
      Resource: "*"
+   - Effect: "Allow"
+     Action:
+       - "s3:PutObject"
+     Resource:
+       Fn::Join:
+         - ""
+         - - "arn:aws:s3:::"
+           - "Ref" : "ServerlessDeploymentBucket"
+
 
 # you can define service wide environment variables here
 #  environment:
@@ -49,9 +62,7 @@ functions:
   hello:
     handler: handler.hello
     events:
-     - http:
-         path: hello
-         method: get
+     - http: get hello
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -67,7 +78,7 @@ functions:
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
-searchTime:
+  searchTime:
     handler: handler.onScan
     events:
       - http:
